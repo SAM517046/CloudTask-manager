@@ -5,6 +5,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.12'
@@ -18,3 +19,21 @@ steps:
 - script: |
     python -m pytest -v
   displayName: 'Run automated tests'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/cloudtask-manager.zip'
+    replaceExistingArchive: true
+  displayName: 'Create deployment package'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'azure-service-connection'
+    appType: 'webAppLinux'
+    appName: 'cloudtask-manager-mohammad'
+    package: '$(Build.ArtifactStagingDirectory)/cloudtask-manager.zip'
+    startUpCommand: 'gunicorn --bind=0.0.0.0 --timeout 600 app:app'
+  displayName: 'Deploy to Azure App Service'
