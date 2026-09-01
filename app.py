@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+import os
 
 app = Flask(__name__)
 
@@ -52,4 +53,5 @@ def add_task():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=True)
